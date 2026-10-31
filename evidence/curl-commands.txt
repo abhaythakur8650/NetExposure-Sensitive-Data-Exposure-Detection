@@ -1,0 +1,16 @@
+# 1. Password in JSON body
+curl.exe -X POST http://localhost:8080/api/test/login -H "Content-Type: application/json" -d "{\"username\":\"testuser\",\"password\":\"FakePass@123\"}"
+
+# 2. Password in form body
+curl.exe -X POST http://localhost:8080/api/test/form -d "username=testuser&password=FakePass@123"
+
+# 3. API key in query string
+curl.exe "http://localhost:8080/api/test/data?api_key=FAKE-API-KEY-1234567890"
+
+# 4. Bearer token in header
+curl.exe http://localhost:8080/api/test/data -H "Authorization: Bearer FAKE.TOKEN.abcdef123456"
+
+# 5. Email (personal data) plus a harmless request for comparison
+curl.exe "http://localhost:8080/api/test/data?email=test.user@example.com"
+curl.exe "http://localhost:8080/api/test/data?page=1"
+

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetExposure | Security Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f7fb;
+            color: #172033;
+        }
+
+        .navbar {
+            background: #101a2c;
+            color: white;
+            padding: 18px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .brand span {
+            color: #43d9bd;
+        }
+
+        .nav-label {
+            color: #c5cede;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 35px auto;
+            padding: 0 22px;
+        }
+
+        .page-heading {
+            margin-bottom: 25px;
+        }
+
+        .page-heading h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .page-heading p {
+            color: #68758a;
+            font-size: 15px;
+        }
+
+        .upload-container {
+            background: white;
+            border: 1px solid #e3e9f2;
+            border-radius: 14px;
+            padding: 26px;
+            margin-bottom: 28px;
+            box-shadow: 0 5px 20px rgba(20, 35, 60, 0.04);
+        }
+
+        .section-title {
+            font-size: 19px;
+            margin-bottom: 8px;
+        }
+
+        .section-description {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .file-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .file-option {
+            border: 1px solid #dce4ef;
+            border-radius: 10px;
+            padding: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #fbfcfe;
+        }
+
+        .file-option:hover {
+            border-color: #1c9f91;
+            background: #f2fffc;
+        }
+
+        .file-option input {
+            margin-right: 8px;
+            accent-color: #15998c;
+        }
+
+        .file-option strong {
+            display: block;
+            margin-top: 8px;
+            font-size: 15px;
+        }
+
+        .file-option small {
+            display: block;
+            color: #718096;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .file-input {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px;
+            border: 1px dashed #b9c6d8;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: #15998c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #107c72;
+        }
+
+        .btn-primary:disabled {
+            background: #8bbdb7;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            margin-top: 15px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .message.error {
+            display: block;
+            color: #9f2525;
+            background: #fff0f0;
+            border: 1px solid #ffd2d2;
+        }
+
+        .message.info {
+            display: block;
+            color: #17665e;
+            background: #eafffa;
+            border: 1px solid #bcece2;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e3e9f2;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(20, 35, 60, 0.03);
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .stat-total {
+            border-left: 4px solid #64748b;
+        }
+
+        .stat-critical {
+            border-left: 4px solid #e5484d;
+        }
+
+        .stat-high {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .stat-medium {
+            border-left: 4px solid #eab308;
+        }
+
+        .results-section {
+            background: white;
+            border: 1px solid #e3e9f2;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(20, 35, 60, 0.04);
+        }
+
+        .results-header {
+            padding: 22px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #e9eef5;
+        }
+
+        .results-header h2 {
+            font-size: 19px;
+        }
+
+        .results-header p {
+            color: #718096;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-control {
+            border: 1px solid #dce4ef;
+            background: white;
+            padding: 9px 12px;
+            border-radius: 7px;
+            color: #344054;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid #edf1f6;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #65748b;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        tbody tr:hover {
+            background: #fafcff;
+        }
+
+        .severity {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .critical {
+            color: #b4232c;
+            background: #feecee;
+        }
+
+        .high {
+            color: #b45309;
+            background: #fff3dc;
+        }
+
+        .medium {
+            color: #854d0e;
+            background: #fef9c3;
+        }
+
+        .masked-value {
+            font-family: Consolas, monospace;
+            color: #334155;
+            word-break: break-all;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 45px 20px;
+            color: #718096;
+        }
+
+        .empty-state strong {
+            display: block;
+            color: #344054;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .how-it-works {
+            margin-top: 28px;
+            background: white;
+            border: 1px solid #e3e9f2;
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .workflow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .workflow-step {
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            background: #f5f8fc;
+            border: 1px solid #e4ebf4;
+            border-radius: 9px;
+            padding: 15px 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .arrow {
+            color: #15998c;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px 15px;
+            color: #8490a3;
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .results-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .navbar {
+                padding: 16px 20px;
+            }
+
+            .container {
+                margin-top: 24px;
+                padding: 0 14px;
+            }
+
+            .file-options {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                gap: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .stat-number {
+                font-size: 25px;
+            }
+
+            .upload-form {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .file-input {
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="brand">Net<span>Exposure</span></div>
+    <div class="nav-label">Sensitive Data Detection System</div>
+</header>
+
+<main class="container">
+
+    <section class="page-heading">
+        <h1>Security Dashboard</h1>
+        <p>Scan network captures and documents to identify exposed sensitive information.</p>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="upload-container">
+        <h2 class="section-title">Scan a File</h2>
+        <p class="section-description">
+            Upload a Wireshark JSON capture or a text-based PDF document.
+        </p>
+
+        <div class="file-options">
+            <label class="file-option">
+                <input type="radio" name="scanType" value="json" checked>
+                <strong>Wireshark JSON</strong>
+                <small>Analyze captured network traffic for sensitive information.</small>
+            </label>
+
+            <label class="file-option">
+                <input type="radio" name="scanType" value="pdf">
+                <strong>PDF Document</strong>
+                <small>Extract document text and scan it for sensitive information.</small>
+            </label>
+        </div>
+
+        <form id="uploadForm" class="upload-form" enctype="multipart/form-data">
+            <input
+                    class="file-input"
+                    type="file"
+                    id="file"
+                    name="file"
+                    accept=".json"
+                    required>
+
+            <button class="btn btn-primary" id="scanButton" type="submit">
+                Scan File
+            </button>
+        </form>
+
+        <div id="uploadMessage" class="message"></div>
+    </section>
+
+    <!-- Summary Cards -->
+    <section class="stats-grid">
+        <div class="card stat-total">
+            <div class="stat-label">Total Findings</div>
+            <div class="stat-number" th:text="${findings.size()}">0</div>
+        </div>
+
+        <div class="card stat-critical">
+            <div class="stat-label">Critical</div>
+            <div class="stat-number"
+                 th:text="${findings.?[severity == 'CRITICAL'].size()}">0</div>
+        </div>
+
+        <div class="card stat-high">
+            <div class="stat-label">High</div>
+            <div class="stat-number"
+                 th:text="${findings.?[severity == 'HIGH'].size()}">0</div>
+        </div>
+
+        <div class="card stat-medium">
+            <div class="stat-label">Medium</div>
+            <div class="stat-number"
+                 th:text="${findings.?[severity == 'MEDIUM'].size()}">0</div>
+        </div>
+    </section>
+
+    <!-- Findings Table -->
+    <section class="results-section">
+        <div class="results-header">
+            <div>
+                <h2>Detected Findings</h2>
+                <p>Detected values are masked for safer review.</p>
+            </div>
+
+            <div class="filters">
+                <select id="severityFilter" class="filter-control">
+                    <option value="">All Severities</option>
+                    <option value="CRITICAL">Critical</option>
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                </select>
+
+                <select id="typeFilter" class="filter-control">
+                    <option value="">All Types</option>
+                    <option value="API_KEY">API Key</option>
+                    <option value="PASSWORD">Password</option>
+                    <option value="BEARER_TOKEN">Bearer Token</option>
+                    <option value="EMAIL">Email</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-wrapper" th:if="${!findings.isEmpty()}">
+            <table id="findingsTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Severity</th>
+                    <th>Masked Value</th>
+                    <th>Frame</th>
+                    <th>Method</th>
+                    <th>URI</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="finding : ${findings}"
+                    th:attr="data-severity=${finding.severity},data-type=${finding.type}">
+                    <td th:text="${finding.id}">1</td>
+                    <td th:text="${finding.type}">API_KEY</td>
+
+                    <td>
+                        <span class="severity"
+                              th:classappend="${#strings.toLowerCase(finding.severity)}"
+                              th:text="${finding.severity}">CRITICAL</span>
+                    </td>
+
+                    <td class="masked-value" th:text="${finding.maskedValue}">****</td>
+                    <td th:text="${finding.frameNumber != null ? finding.frameNumber : '—'}">—</td>
+                    <td th:text="${finding.method != null ? finding.method : '—'}">—</td>
+                    <td th:text="${finding.uri != null ? finding.uri : '—'}">—</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${findings.isEmpty()}">
+            <strong>No findings to display</strong>
+            Upload a JSON capture or PDF document to begin scanning.
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-it-works">
+        <h2 class="section-title">How NetExposure Works</h2>
+        <p class="section-description">
+            Files are processed, sensitive values are detected and masked, and findings are stored for review.
+        </p>
+
+        <div class="workflow">
+            <div class="workflow-step">Upload File</div>
+            <div class="arrow">→</div>
+            <div class="workflow-step">Parse JSON / Extract PDF Text</div>
+            <div class="arrow">→</div>
+            <div class="workflow-step">Detect Sensitive Data</div>
+            <div class="arrow">→</div>
+            <div class="workflow-step">Mask & Store Findings</div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    NetExposure | Java · Spring Boot · Apache PDFBox · MySQL
+</footer>
+
+<script>
+    const uploadForm = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("file");
+    const scanButton = document.getElementById("scanButton");
+    const uploadMessage = document.getElementById("uploadMessage");
+    const scanTypeOptions = document.querySelectorAll('input[name="scanType"]');
+
+    function getSelectedScanType() {
+        return document.querySelector('input[name="scanType"]:checked').value;
+    }
+
+    function updateFileAccept() {
+        const scanType = getSelectedScanType();
+        fileInput.value = "";
+        fileInput.accept = scanType === "pdf" ? ".pdf,application/pdf" : ".json,application/json";
+    }
+
+    scanTypeOptions.forEach(option => {
+        option.addEventListener("change", updateFileAccept);
+    });
+
+    function showMessage(message, type) {
+        uploadMessage.textContent = message;
+        uploadMessage.className = "message " + type;
+    }
+
+    uploadForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const file = fileInput.files[0];
+        const scanType = getSelectedScanType();
+
+        if (!file) {
+            showMessage("Please select a file to scan.", "error");
+            return;
+        }
+
+        const fileName = file.name.toLowerCase();
+
+        if (scanType === "json" && !fileName.endsWith(".json")) {
+            showMessage("Please select a Wireshark .json file.", "error");
+            return;
+        }
+
+        if (scanType === "pdf" && !fileName.endsWith(".pdf")) {
+            showMessage("Please select a .pdf document.", "error");
+            return;
+        }
+
+        const endpoint = scanType === "pdf"
+            ? "/api/scan/pdf"
+            : "/api/scan/file";
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        scanButton.disabled = true;
+        scanButton.textContent = "Scanning...";
+        showMessage("Scanning file. Please wait...", "info");
+
+        try {
+            const response = await fetch(endpoint, {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "File scanning failed.");
+            }
+
+            // The scan endpoints return JSON findings.
+            // Reload dashboard so Thymeleaf displays the latest database results.
+            await response.json();
+
+            showMessage("Scan completed successfully. Loading findings...", "info");
+            window.location.href = "/dashboard";
+
+        } catch (error) {
+            showMessage(
+                error.message || "Unable to scan this file. Please check the file and try again.",
+                "error"
+            );
+            scanButton.disabled = false;
+            scanButton.textContent = "Scan File";
+        }
+    });
+
+    // Findings filters
+    const severityFilter = document.getElementById("severityFilter");
+    const typeFilter = document.getElementById("typeFilter");
+
+    function filterFindings() {
+        const selectedSeverity = severityFilter.value;
+        const selectedType = typeFilter.value;
+        const rows = document.querySelectorAll("#findingsTable tbody tr");
+
+        rows.forEach(row => {
+            const rowSeverity = row.getAttribute("data-severity");
+            const rowType = row.getAttribute("data-type");
+
+            const severityMatches = !selectedSeverity || rowSeverity === selectedSeverity;
+            const typeMatches = !selectedType || rowType === selectedType;
+
+            row.style.display = severityMatches && typeMatches ? "" : "none";
+        });
+    }
+
+    severityFilter.addEventListener("change", filterFindings);
+    typeFilter.addEventListener("change", filterFindings);
+</script>
+
+</body>
+</html>
